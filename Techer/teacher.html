@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gradly - Teacher</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Almarai', Arial, sans-serif; }
+
+    /* Layout */
+    .sidebar { width: 260px; min-width: 220px; }
+    .main-content { background:#f7fbff; min-height: calc(100vh - 64px); }
+
+    /* Sidebar */
+    .site-logo { letter-spacing: 0.4px; }
+    .sidebar-menu li {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.75rem 1rem; border-radius:.5rem; cursor:pointer;
+      transition: background-color .18s, color .18s;
+      color: #374151; font-weight:500;
+    }
+    .sidebar-menu li:hover { background:#f3f4f6; }
+    .sidebar-menu li.active { background:#eef2ff; color:#4338ca; font-weight:600; }
+
+    /* Stat cards */
+    .stat-card { background:#fff; border-radius:.75rem; padding:1rem; display:flex; gap:1rem; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+    .stat-icon { width:3rem; height:3rem; border-radius:9999px; display:flex; align-items:center; justify-content:center; background:#eef2ff; color:#4f46e5; font-size:1.25rem; }
+
+    /* Sections & tabs */
+    .section-title { font-size:1.125rem; font-weight:700; color:#111827; margin-bottom:1rem; padding-bottom:.5rem; border-bottom:1px solid #e5e7eb; }
+    .tab-nav { display:flex; gap:.5rem; margin-bottom:1.25rem; }
+    .tab-btn { padding:.5rem .75rem; border-radius:.5rem; background:#f3f4f6; color:#374151; font-weight:600; cursor:pointer; }
+    .tab-btn.active { background:#eef2ff; color:#4338ca; }
+
+    /* Role dropdown */
+    #roles-dropdown { min-width:140px; right:1rem; left:auto; }
+
+    /* Dark mode */
+    .dark body { background:#0f172a; color:#cbd5e1; }
+    .dark .sidebar { background:#0b1220; color:#cbd5e1; border-left-color:#1f2937; }
+    .dark .sidebar-menu li { color:#cbd5e1; }
+    .dark .sidebar-menu li:hover { background:#1f2937; }
+    .dark .sidebar-menu li.active { background:#2b2f6b; color:#e0e7ff; }
+    .dark .stat-card { background:#0b1220; box-shadow:0 1px 3px rgba(0,0,0,.4); }
+    .dark .stat-icon { background:#3730a3; color:#e0e7ff; }
+    .dark .section-title { color:#f9fafb; border-color:#374151; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sidebar { position:fixed; left:0; top:0; bottom:0; transform:translateX(0); z-index:40; }
+    }
+  </style>
+</head>
+<body>
+<div class="flex min-h-screen">
+
+  <!-- Sidebar -->
+  <aside class="sidebar bg-white border-l shadow-sm flex flex-col">
+    <div class="h-16 flex items-center justify-center border-b px-4">
+      <div class="flex items-center gap-2">
+        <span class="site-logo text-indigo-700 text-2xl font-extrabold" data-translate="gradly">GRADLY</span>
+      </div>
+    </div>
+
+    <div class="p-4 border-b">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700">
+          <i class="fas fa-user"></i>
+        </div>
+        <div>
+          <!-- معلومات المستخدم تُملأ ديناميكياً بواسطة JS -->
+          <div id="user-fullname" class="font-semibold" aria-live="polite"></div>
+          <div id="user-role" class="text-xs text-gray-500" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <!-- role switcher (hidden by default) -->
+      <div id="role-switcher" class="mt-3" style="display:none;">
+        <button id="current-role-btn" class="w-full bg-gray-100 text-sm p-2 rounded flex justify-between items-center">
+          <span>الدور: <span id="current-role-name"></span></span> <i class="fas fa-chevron-down text-xs"></i>
+        </button>
+        <ul id="roles-dropdown" class="hidden absolute mt-1 bg-white border rounded shadow-lg z-50"></ul>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-3 overflow-y-auto">
+      <ul class="sidebar-menu space-y-1">
+        <li class="active" data-page="dashboard-content" data-translate="dashboard"><i class="fas fa-home w-6"></i> الرئيسية</li>
+        <li data-page="classes-content" data-translate="classes_and_students"><i class="fas fa-users w-6"></i> الأقسام والتلاميذ</li>
+        <li data-page="courses-content" data-translate="courses"><i class="fas fa-book w-6"></i> المقررات الدراسية</li>
+        <li data-page="assessments-content" data-translate="assessments"><i class="fas fa-table w-6"></i> التقييمات والدرجات</li>
+        <li data-page="meetings-content" data-translate="meetings"><i class="fas fa-calendar-alt w-6"></i> الاجتماعات</li>
+        <li data-page="settings-content" data-translate="settings"><i class="fas fa-cog w-6"></i> الإعدادات</li>
+      </ul>
+    </nav>
+
+    <div class="p-4 border-t">
+      <button id="logout-btn" class="w-full flex items-center justify-center gap-2 bg-gray-100 text-red-600 p-2 rounded font-semibold" data-translate="logout">
+        <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 flex flex-col">
+    <!-- Top bar (inside main) -->
+    <div class="h-16 flex-shrink-0 bg-white border-b flex items-center justify-end px-6">
+      <div class="flex items-center gap-4">
+        <button id="language-btn" class="p-2 rounded-full hover:bg-gray-100 text-gray-600" aria-label="تبديل اللغة">
+          <i class="fas fa-globe"></i>
+        </button>
+        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 text-gray-600" aria-label="تبديل الوضع">
+          <i id="theme-icon" class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- scrollable content -->
+    <div class="main-content p-6 overflow-y-auto flex-1">
+      <!-- Dashboard content -->
+      <div id="dashboard-content" class="content-area">
+        <div class="section-title" data-translate="dashboard">لوحة التحكم</div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+            <div>
+              <div class="text-sm text-gray-500" data-translate="studentsCount">عدد التلاميذ</div>
+              <div id="stat-students" class="text-xl font-bold">--</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+            <div>
+              <div class="text-sm text-gray-500" data-translate="departmentsCount">عدد الأقسام</div>
+              <div id="stat-classes" class="text-xl font-bold">--</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div>
+              <div class="text-sm text-gray-500" data-translate="upcomingMeetings">الاجتماعات القادمة</div>
+              <div id="stat-meetings" class="text-xl font-bold">--</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+            <div>
+              <div class="text-sm text-gray-500" data-translate="pendingAssessments">تقييمات لم تكتمل</div>
+              <div id="stat-pending" class="text-xl font-bold">--</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- استبدال بطاقتي النشاطات والاجتماعات بكائن شبكة صفحتين -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <div class="bg-white rounded shadow p-4">
+            <h3 class="font-bold text-lg mb-3" data-translate="recentActivities">
+              <i class="fas fa-history text-indigo-600 ml-2"></i> آخر النشاطات
+            </h3>
+            <div id="latest-activities-list">جاري التحميل...</div>
+          </div>
+
+          <div class="bg-white rounded shadow p-4">
+            <h3 class="font-bold text-lg mb-3" data-translate="upcomingMeetings">
+              <i class="fas fa-calendar-alt text-indigo-600 ml-2"></i> الاجتماعات القادمة
+            </h3>
+            <div id="upcoming-meetings-list">جاري التحميل...</div>
+          </div>
+        </div>
+
+        <!-- ======= التلاميذ المتفوقون (عرض أول 4) ======= -->
+        <div class="mt-6">
+          <div class="section-title">التلاميذ المتفوقون</div>
+          <div id="top-students" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- سيتم تعبئتها عبر dashboard.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Classes -->
+      <div id="classes-content" class="content-area hidden">
+        <div class="section-title" data-translate="assignedClasses">الأقسام المسندة إليك</div>
+        <div id="classes-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- Courses -->
+      <div id="courses-content" class="content-area hidden">
+        <div class="section-title" data-translate="courses">المقررات الدراسية</div>
+        <div id="courses-list"></div>
+      </div>
+
+      <!-- Assessments -->
+      <div id="assessments-content" class="content-area hidden">
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="grids-tab" data-translate="grids_tab">شبكات التقييم</button>
+          <button class="tab-btn" data-tab="grades-tab" data-translate="grades_tab">إدخال الدرجات</button>
+          <button class="tab-btn" data-tab="gradebook-tab" data-translate="gradebook_tab">سجل الدرجات</button>
+        </div>
+
+        <div id="grids-tab" class="tab-content">
+          <div class="section-title" data-translate="your_networks">شبكات التقييم الخاصة بك</div>
+          <div id="evaluation-networks-list"></div>
+        </div>
+
+        <div id="grades-tab" class="tab-content hidden">
+          <form id="grade-form" class="space-y-3">
+            <div><label>القسم</label><select id="class-select" class="w-full p-2 border rounded"></select></div>
+            <div><label>التلميذ</label><select id="student-select" class="w-full p-2 border rounded"></select></div>
+            <div><label>شبكة/نشاط التقييم</label><select id="network-select" class="w-full p-2 border rounded"></select></div>
+            <div><label>الدرجة</label><input id="grade-input" type="number" min="0" max="20" step="0.01" class="w-full p-2 border rounded" /></div>
+            <div><label>ملاحظة</label><textarea id="grade-comment" class="w-full p-2 border rounded"></textarea></div>
+            <div><button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">حفظ الدرجة</button></div>
+            <div id="grade-form-result" class="text-sm mt-2"></div>
+          </form>
+        </div>
+
+        <div id="gradebook-tab" class="tab-content hidden">
+          <div class="section-title" data-translate="gradebook">سجل الدرجات</div>
+          <div id="evaluations-filter" class="mb-4"></div>
+          <div id="grades-list"></div>
+        </div>
+      </div>
+
+      <!-- Meetings -->
+      <div id="meetings-content" class="content-area hidden">
+        <div class="section-title" data-translate="meetings">الاجتماعات</div>
+        <div id="meetings-list"></div>
+      </div>
+
+      <!-- Settings -->
+      <div id="settings-content" class="content-area hidden">
+        <div class="section-title" data-translate="settings">الإعدادات</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="font-bold mb-2" data-translate="profile_info">معلوماتي الشخصية</h3>
+            <form id="profile-form">
+              <input type="text" id="teacher-fullname" class="w-full mb-3 p-2 border rounded" placeholder="الاسم الكامل" required />
+              <input type="email" id="teacher-email" class="w-full mb-3 p-2 border rounded" placeholder="البريد الإلكتروني" required />
+              <input type="text" id="teacher-phone" class="w-full mb-3 p-2 border rounded" placeholder="رقم الهاتف" required />
+              <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded" data-translate="save_changes">حفظ التغييرات</button>
+            </form>
+          </div>
+
+          <div>
+            <h3 class="font-bold mb-2" data-translate="notifications">إعدادات الإشعارات</h3>
+            <label class="flex items-center gap-2 mb-2"><input type="checkbox" id="email-notifications" /> <span data-translate="enable_email_notifications">تفعيل الإشعارات عبر البريد الإلكتروني</span></label>
+            <label class="flex items-center gap-2 mb-2"><input type="checkbox" id="sms-notifications" /> <span data-translate="enable_sms_notifications">تفعيل الإشعارات عبر الرسائل النصية</span></label>
+
+            <h3 class="font-bold mb-2 mt-6" data-translate="ui_preferences">تفضيلات الواجهة</h3>
+            <label class="flex items-center gap-2 mb-2"><input type="checkbox" id="dark-mode" /> <span data-translate="dark_mode_label">الوضع الداكن</span></label>
+            <label class="flex items-center gap-2 mb-2"><select id="language-select" class="border rounded p-2">
+              <option value="ar" data-translate="lang_ar">العربية</option>
+              <option value="fr" data-translate="lang_fr">Français</option>
+              <option value="en" data-translate="lang_en">English</option>
+            </select> <span data-translate="language_label">اللغة</span></label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal لعرض ملف التلميذ -->
+<!-- Modal لعرض ملف التلميذ -->
+<div id="studentModal" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black bg-opacity-50 hidden" onclick="if(event.target===this) closeStudentModal()">
+  <div id="studentModalContent" role="dialog" aria-modal="true" class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <!-- المحتوى يُملأ ديناميكياً بواسطة classes.js -> showStudentProfile -->
+  </div>
+</div>
+
+<!-- module scripts -->
+<script type="module" src="./js/supabaseClient.js"></script>
+<script type="module" src="./js/auth.js"></script>
+<script type="module" src="./js/ui/navigation.js"></script>
+<script type="module" src="./js/pages/dashboard.js"></script>
+<script type="module" src="./js/pages/classes.js"></script>
+<script type="module" src="./js/pages/meetings.js"></script>
+<script type="module" src="./js/main.js"></script>
+
+<!-- SheetJS for export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- translations & theme script -->
+<script>
+  (function() {
+    const translations = {
+      ar: {
+        gradly: "GRADLY", dashboard: "لوحة التحكم", classes_and_students: "الأقسام والتلاميذ",
+        courses: "المقررات الدراسية", assessments: "التقييمات والدرجات", meetings: "الاجتماعات",
+        settings: "الإعدادات", logout: "تسجيل الخروج", user_name: "أستاذ خالد محمود", role_teacher: "معلم",
+        studentsCount: "عدد التلاميذ", departmentsCount: "عدد الأقسام", upcomingMeetings: "الاجتماعات القادمة",
+        pendingAssessments: "تقييمات لم تكتمل", recentActivities: "آخر النشاطات", gradebook: "سجل الدرجات"
+      },
+      en: {
+        gradly: "GRADLY", dashboard: "Dashboard", classes_and_students: "Classes & Students",
+        courses: "Courses", assessments: "Assessments & Grades", meetings: "Meetings",
+        settings: "Settings", logout: "Logout", user_name: "Mr. Khaled Mahmoud", role_teacher: "Teacher",
+        studentsCount: "Students", departmentsCount: "Departments", upcomingMeetings: "Upcoming Meetings",
+        pendingAssessments: "Incomplete Evaluations", recentActivities: "Recent Activities", gradebook: "Gradebook"
+      },
+      fr: {
+        gradly: "GRADLY", dashboard: "Tableau de bord", classes_and_students: "Classes et élèves",
+        courses: "Cours", assessments: "Évaluations et notes", meetings: "Réunions",
+        settings: "Paramètres", logout: "Se déconnecter", user_name: "M. Khaled Mahmoud", role_teacher: "Enseignant",
+        studentsCount: "Élèves", departmentsCount: "Départements", upcomingMeetings: "Réunions à venir",
+        pendingAssessments: "Évaluations incomplètes", recentActivities: "Activités récentes", gradebook: "Carnet de notes"
+      }
+    };
+
+    const availableLangs = ['ar','en','fr'];
+    let currentLang = localStorage.getItem('gradly-lang') || 'ar';
+    let isDarkMode = localStorage.getItem('gradly-theme') === 'dark';
+
+    function translatePage(lang) {
+      document.querySelectorAll("[data-translate]").forEach(el => {
+        const key = el.getAttribute("data-translate");
+        if (translations[lang] && translations[lang][key]) el.textContent = translations[lang][key];
+      });
+      document.documentElement.lang = lang;
+      document.documentElement.dir = 'rtl';
+    }
+
+    function applyTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+      if (isDarkMode) {
+        html.classList.add('dark');
+        if (icon) icon.className = "fas fa-sun";
+      } else {
+        html.classList.remove('dark');
+        if (icon) icon.className = "fas fa-moon";
+      }
+      // Sync settings checkbox if present
+      const darkCheckbox = document.getElementById('dark-mode');
+      if (darkCheckbox) darkCheckbox.checked = isDarkMode;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const langBtn = document.getElementById('language-btn');
+      const themeBtn = document.getElementById('theme-toggle');
+      const darkCheckbox = document.getElementById('dark-mode'); // موجود داخل صفحة الإعدادات
+
+      // init
+      translatePage(currentLang);
+      applyTheme();
+
+      if (langBtn) {
+        langBtn.addEventListener('click', () => {
+          let idx = availableLangs.indexOf(currentLang);
+          idx = (idx + 1) % availableLangs.length;
+          currentLang = availableLangs[idx];
+          localStorage.setItem('gradly-lang', currentLang);
+          translatePage(currentLang);
+        });
+      }
+
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          isDarkMode = !isDarkMode;
+          localStorage.setItem('gradly-theme', isDarkMode ? 'dark' : 'light');
+          applyTheme();
+        });
+      }
+
+      // sync checkbox in settings with same behavior
+      if (darkCheckbox) {
+        // initialize state already done in applyTheme
+        darkCheckbox.addEventListener('change', () => {
+          isDarkMode = !!darkCheckbox.checked;
+          localStorage.setItem('gradly-theme', isDarkMode ? 'dark' : 'light');
+          applyTheme();
+        });
+      }
+    });
+  })();
+</script>
+</body>
+</html>

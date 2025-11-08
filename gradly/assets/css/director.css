@@ -1,0 +1,29 @@
+/* ...existing code... */
+:root{
+  --bg:#ffffff;--surface:#ffffff;--muted:#6b7280;--text:#0f1724;
+  --accent:#2563eb;--accent-600:#1e40af;--danger:#ef4444;--radius:10px;
+  --shadow:0 8px 24px rgba(15,23,42,0.08);
+  --glass: rgba(255,255,255,0.06);
+}
+[data-theme="dark"]{
+  --bg:#071023;--surface:#0b1321;--muted:#98a0ac;--text:#e6eef8;
+  --accent:#3b82f6;--accent-600:#1e3a8a;--danger:#f87171;--shadow:0 8px 24px rgba(0,0,0,0.6);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:Inter, "Noto Kufi Arabic", system-ui;}
+.container{max-width:1200px;margin:24px auto;padding:16px;}
+.header{display:flex;justify-content:space-between;align-items:center;padding:12px 0;}
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;}
+.btn{background:linear-gradient(180deg,var(--accent),var(--accent-600));color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid rgba(0,0,0,0.06);}
+.stat-card{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px}
+.table{width:100%;border-collapse:collapse}
+.table th{background:color-mix(in srgb, var(--surface) 95%, var(--bg) 5%);text-align:right;padding:10px}
+.table td{padding:10px;border-bottom:1px solid color-mix(in srgb, var(--muted) 92%, transparent 8%)}
+.badge{padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--accent) 12%, transparent 88%);color:var(--accent)}
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;z-index:60}
+.modal .dialog{width:100%;max-width:880px;background:var(--surface);border-radius:12px;padding:18px;box-shadow:var(--shadow)}
+.toast-container{position:fixed;bottom:20px;left:20px;z-index:80;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 14px;border-radius:8px;color:#fff;background:var(--accent);box-shadow:var(--shadow)}
+/* تحسين RTL */
+[dir="rtl"] .table th, [dir="rtl"] .table td { text-align: right; }
+/* ...existing code... */

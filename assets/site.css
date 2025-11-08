@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700&display=swap');
+
+:root{
+  --brand-primary: #1976d2;   /* أزرق رئيسي */
+  --brand-accent: #42a5f5;
+  --bg: #ffffff;
+  --surface: #f7fbff;
+  --text: #222;
+  --muted: #6b7280;
+  --radius: 8px;
+  --logo-font-size: 25px; /* تم تكبير حجم اللوغو قليلاً (من 20px إلى 22px) */
+  --base-font: "Almarai", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* قاعدية عامة */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--base-font);
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* مواضع عامة للحاوية الرئيسية (sidebar + content) */
+.app, .layout {
+  display:flex;
+  min-height:100vh;
+  gap:0;
+}
+
+/* شريط جانبي موحّد */
+.site-sidebar, .sidebar {
+  width:260px;
+  background:#fff;
+  border-left:1px solid #e5e7eb;
+  display:flex;
+  flex-direction:column;
+  padding:0;
+}
+
+/* موضع اسم الموقع (logo) موحد */
+.site-logo {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:50px;
+  font-weight:700;
+  color:var(--brand-primary);
+  font-size:var(--logo-font-size);
+  letter-spacing:0.6px;
+  border-bottom:1px solid #f0f3f7;
+}
+
+/* معلومات المستخدم المصغرة */
+.user-info{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:14px;
+}
+.user-info .avatar{width:44px;height:44px;border-radius:50%;background:#eef6ff;display:flex;align-items:center;justify-content:center;color:var(--brand-primary)}
+
+.user-details h4{margin:0;font-size:14px;font-weight:700}
+.user-details p{margin:2px 0 0 0;color:var(--muted);font-size:12px}
+
+/* زر تبديل الدور موحد */
+#role-switcher{position:relative}
+#current-role-btn{
+  background:var(--brand-primary);
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  font-size:12px;
+  cursor:pointer;
+}
+#roles-dropdown{position:absolute; right:0; top:110%; display:none; background:#fff; border:1px solid #e6eefc; box-shadow:0 6px 18px rgba(25,118,210,0.08); border-radius:6px; min-width:160px; z-index:80; padding:6px 0}
+#roles-dropdown li{padding:8px 12px; cursor:pointer}
+#roles-dropdown li:hover{background:#f3f8ff}
+
+/* الترويسات والأزرار موحدة */
+h1,h2,h3{color:var(--text);font-weight:700}
+.btn{background:var(--brand-primary);color:#fff;border:none;padding:10px 14px;border-radius:6px;cursor:pointer}
+.btn-outline{background:transparent;border:1px solid var(--brand-primary);color:var(--brand-primary);padding:8px 12px;border-radius:6px}
+
+/* محتوى رئيسي موحد */
+.main-content, .main {flex:1;padding:20px}
+
+/* قواعد استجابة بسيطة */
+@media (max-width:900px){
+  .site-sidebar{display:none}
+  .main-content{padding:12px}
+}
