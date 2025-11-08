@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل الدخول</title>
+    <link rel="icon" href="logo.jpg" type="image/jpeg">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-box {
+            background: #fff;
+            padding: 20px 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px #ccc;
+            width: 320px;
+            text-align: center;
+        }
+        .login-box img {
+            width: 100px;
+            margin-bottom: 15px;
+        }
+        .login-box h2 {
+            margin-bottom: 20px;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .login-box .error {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <img src="logo.jpg" alt="Gradly Logo">
+    <h2>تسجيل الدخول</h2>
+    <form id="loginForm">
+        <input type="email" id="username" placeholder="البريد الإلكتروني" required>
+        <input type="password" id="password" placeholder="كلمة المرور" required>
+        <button type="submit">دخول</button>
+        <div class="error" id="errorBox"></div>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="login_page.js"></script>
+</body>
+</html>
