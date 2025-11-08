@@ -6,14 +6,14 @@ let currentUser = null;
 export async function authGuard() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-        window.location.href = 'login_page.html';
+        window.location.href = 'index.html';
         return false;
     }
 
     const { data: profile, error } = await supabase.from('profiles').select('full_name, role').eq('id', session.user.id).single();
     if (error || !profile || !['director', 'admin'].includes(profile.role)) {
         await supabase.auth.signOut();
-        window.location.href = 'login_page.html';
+        window.location.href = 'index.html';
         return false;
     }
     
@@ -27,6 +27,6 @@ export async function handleLogout() {
     if (confirm("هل أنت متأكد من تسجيل الخروج؟")) {
         showToast("جاري تسجيل الخروج...", "success");
         await supabase.auth.signOut();
-        window.location.href = 'login_page.html';
+        window.location.href = 'index.html';
     }
 }

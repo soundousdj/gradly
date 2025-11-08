@@ -20,14 +20,14 @@ let currentUserProfile = null;
 (async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-        window.location.href = '../login_page.html';
+        window.location.href = '../index.html';
         return;
     }
 
     const { data: profile, error } = await supabase.from('profiles').select('current_role').eq('id', session.user.id).single();
     if (error || !profile || !profile.current_role) {
         await supabase.auth.signOut();
-        window.location.href = '../login_page.html';
+        window.location.href = '../index.html';
         return;
     }
 
@@ -35,7 +35,7 @@ let currentUserProfile = null;
     if (authorizedRole !== 'teacher') {
         if (authorizedRole === 'director' || authorizedRole === 'admin') window.location.href = '../gradly/director.html';
         else if (authorizedRole === 'parent') window.location.href = '../parent/index.html';
-        else window.location.href = '../login_page.html';
+        else window.location.href = '../index.html';
         return;
     }
     
@@ -48,7 +48,7 @@ async function initializeTeacherPage(userId) {
     try {
         currentUserProfile = await getCurrentUserProfile();
         if (!currentUserProfile) {
-            window.location.href = '../login_page.html';
+            window.location.href = '../index.html';
             return;
         }
 
@@ -64,7 +64,7 @@ async function initializeTeacherPage(userId) {
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) logoutBtn.addEventListener('click', async () => {
             await supabase.auth.signOut();
-            window.location.href = '../login_page.html';
+            window.location.href = '../index.html';
         });
 
         setupNavigation(loadPageData);
@@ -222,7 +222,7 @@ async function main() {
 
         document.getElementById('logout-btn').addEventListener('click', async () => {
             await supabase.auth.signOut();
-            window.location.href = 'login_page.html';
+            window.location.href = 'index.html';
         });
 
         setupNavigation(loadPageData);

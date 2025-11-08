@@ -9,7 +9,7 @@ export async function getCurrentUserProfile() {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-        window.location.href = 'login_page.html';
+        window.location.href = 'index.html';
         return null;
     }
 

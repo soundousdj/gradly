@@ -44,12 +44,12 @@ function escapeHtml(unsafe) {
 
 (async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = '../login_page.html'; return; }
+    if (!session) { window.location.href = '../index.html'; return; }
 
     const { data: profile, error } = await supabase.from('profiles').select('current_role').eq('id', session.user.id).single();
     if (error || !profile || !profile.current_role) {
         await supabase.auth.signOut();
-        window.location.href = '../login_page.html';
+        window.location.href = '../index.html';
         return;
     }
 
@@ -57,7 +57,7 @@ function escapeHtml(unsafe) {
     if (authorizedRole !== 'parent') {
         if (authorizedRole === 'director' || authorizedRole === 'admin') window.location.href = '../gradly/director.html';
         else if (authorizedRole === 'teacher') window.location.href = '../Techer/teacher.html';
-        else window.location.href = '../login_page.html';
+        else window.location.href = '../index.html';
         return;
     }
 
@@ -186,7 +186,7 @@ themeToggle.addEventListener("click", () => {
 logoutBtn.addEventListener("click", async () => {
     try {
         await supabase.auth.signOut();
-        window.location.href = "../login_page.html";
+        window.location.href = "../index.html";
     } catch (err) {
         alert("حدث خطأ أثناء تسجيل الخروج!");
     }
