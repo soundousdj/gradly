@@ -1,3 +1,16 @@
+const translations = {
+    ar: {
+        "إدارة التلاميذ": "إدارة التلاميذ",
+        "إضافة تلميذ": "إضافة تلميذ",
+        "بحث": "بحث...",
+        // أضف بقية الكلمات هنا
+    },
+    en: {
+        "إدارة التلاميذ": "Students Management",
+        "إضافة تلميذ": "Add Student",
+        "بحث": "Search...",
+    }
+};
 /**
  * UI & App Configuration Manager
  * هذا الملف يدير الترجمة، الوضع الليلي، والتعامل مع أخطاء قاعدة البيانات
@@ -52,7 +65,7 @@ const UI = {
         localStorage.setItem('theme', theme);
 
         // إعداد متغيرات CSS للثيم
-        if (theme === 'dark') {
+        if (theme === 'light') {
             root.style.setProperty('--bg', '#0b1020');
             root.style.setProperty('--surface', '#0f1724');
             root.style.setProperty('--muted', '#9aa4b2');
