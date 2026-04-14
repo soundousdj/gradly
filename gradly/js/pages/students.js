@@ -515,14 +515,34 @@ function escapeHtml(str) {
 
 // --- 5. دالة حذف التلميذ ---
 
+// --- 5. دالة حذف التلميذ (النسخة المصححة) ---
+
 async function deleteStudent(studentId) {
     if (!currentDirectorId) return;
+    
     try {
-        await UI.safeFetch(() => window.supabaseClient.from('student_enrollments').delete().eq('student_id', studentId));
-        await UI.safeFetch(() => window.supabaseClient.from('students').delete().eq('id', studentId).eq('director_id', currentDirectorId));
-        UI.showToast('تم حذف التلميذ بنجاح', 'info');
+        // 1. حذف التسجيلات أولاً (لتجنب قيود المفتاح الخارجي)
+        const { error: enrollError } = await window.supabaseClient
+            .from('student_enrollments')
+            .delete()
+            .eq('student_id', studentId);
+            
+        if (enrollError) throw enrollError;
+
+        // 2. حذف التلميذ نفسه
+        const { error: studentError } = await window.supabaseClient
+            .from('students')
+            .delete()
+            .eq('id', studentId)
+            .eq('director_id', currentDirectorId);
+
+        if (studentError) throw studentError;
+
+        alert('تم حذف التلميذ بنجاح');
+        
     } catch (err) {
-        UI.showToast('فشل حذف التلميذ: ' + (err.message || ''), 'error');
+        console.error('Delete error:', err);
+        alert('فشل حذف التلميذ: ' + (err.message || 'خطأ غير معروف'));
     }
 }
 
