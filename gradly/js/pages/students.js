@@ -202,7 +202,8 @@ export async function initStudentsPage(directorId) {
 
         if (studentForm) studentForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
+            const submitBtn = studentForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true; 
             const studentData = {
                 firstname: document.getElementById('firstname').value.trim(),
                 lastname: document.getElementById('lastname').value.trim(),
