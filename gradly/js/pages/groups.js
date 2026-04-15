@@ -212,7 +212,7 @@ function renderAcademicYearsGroups(academic_years, class_groups, teachers, level
 }
 
 // ========== إعداد جميع أحداث الصفحة ==========
-function setupGroupsPageEvents({students, academic_years, class_groups, teachers}) {
+function setupGroupsPageEvents({students, academic_years, class_groups, teachers, levels}) {
     // حدث البحث عن التلاميذ
     const searchInput = document.getElementById('unassigned-search');
     if (searchInput) {
