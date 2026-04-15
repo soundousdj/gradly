@@ -527,32 +527,50 @@ async function showGroupDetailsModal(groupId, class_groups, teachers) {
   // جلب الأساتذة مع المواد (subject_id) لهذا الفوج
   const { data: teachersInGroup } = await window.supabaseClient
       .from('teacher_class_groups')
-      .select('teacher_id, subject_id, profiles:teacher_id (full_name), subjects:subject_id (name)')
+      .select('teacher_id, subject_id')
       .eq('class_id', groupId);
 
-// --- بناء قائمة الأساتذة للعرض ---
-  let teacherListHtml = '';
+  // جلب جميع المواد مرة واحدة
+  const { data: subjects } = await window.supabaseClient
+      .from('subjects')
+      .select('id, name');
 
-  // 1. عرض المعلم المسؤول (الموجود في تعريف الفوج نفسه)
-  if (group && group.teacher_id) {
-      const mainT = (teachers || []).find(t => String(t.id) === String(group.teacher_id));
-      teacherListHtml += `<li>${mainT ? mainT.full_name : 'أستاذ'} - <span class="text-gray-500">(المعلم المسؤول)</span></li>`;
-  }
+  // بناء قائمة الأساتذة مع اسم المادة — الآن يدعم الحقل group.teacher_id ويجلب المعلمين المفقودين
+  const teachersMap = {};
+  (teachers || []).forEach(t => { teachersMap[String(t.id)] = t; });
 
-  // 2. عرض الأساتذة والمواد من الجدول المشترك (الذين جلبناهم بالـ Join)
-  if (teachersInGroup && teachersInGroup.length > 0) {
+  const subjectsMap = {};
+  (subjects || []).forEach(s => { subjectsMap[String(s.id)] = s; });
+
+  // تجميع مدخلات المعلمين: من teacher_class_groups وأيضاً من حقل class_groups.teacher_id
+  const teacherEntries = [];
+  if (Array.isArray(teachersInGroup) && teachersInGroup.length > 0) {
       teachersInGroup.forEach(tg => {
-          // تجنب تكرار المعلم المسؤول إذا كان موجوداً في القائمة أيضاً
-          if (group && String(tg.teacher_id) === String(group.teacher_id)) return;
-
-          const tName = tg.profiles ? tg.profiles.full_name : 'أستاذ مجهول';
-          const sName = tg.subjects ? tg.subjects.name : 'بدون مادة';
-          
-          teacherListHtml += `<li>${tName} - <span class="text-blue-600 font-bold">(${sName})</span></li>`;
+          teacherEntries.push({ teacher_id: String(tg.teacher_id), subject_id: tg.subject_id ? String(tg.subject_id) : null });
       });
   }
+  if (group && group.teacher_id) {
+      const mainTeacherId = String(group.teacher_id);
+      if (!teacherEntries.find(e => e.teacher_id === mainTeacherId)) {
+          // ضع المعلم المسؤول أولاً إن لم يكن موجوداً
+          teacherEntries.unshift({ teacher_id: mainTeacherId, subject_id: null });
+      }
+  }
 
-  if (teacherListHtml === '') teacherListHtml = '<li>لا يوجد أساتذة مضافين</li>';
+  // جلب أي معلمين مذكورين لكن غير موجودين في teachers الممررة
+  const missingIds = [...new Set(teacherEntries.map(e => e.teacher_id).filter(id => !teachersMap[id]))];
+  if (missingIds.length > 0) {
+      const { data: fetchedTeachers, error: fetchErr } = await window.supabaseClient
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', missingIds);
+      if (!fetchErr && Array.isArray(fetchedTeachers)) {
+          fetchedTeachers.forEach(t => { teachersMap[String(t.id)] = t; });
+      } else {
+          console.warn('فشل جلب المعلمين المفقودين:', fetchErr);
+      }
+  }
+
   // بناء عناصر العرض
   const teacherNames = teacherEntries.map(entry => {
       const teacher = teachersMap[String(entry.teacher_id)];
@@ -570,7 +588,7 @@ async function showGroupDetailsModal(groupId, class_groups, teachers) {
     <button id="export-group-students" class="bg-green-500 text-white px-2 py-1 rounded mb-2">تصدير التلاميذ إلى Excel</button>
     <h4 class="font-semibold mb-2">الأساتذة:</h4>
     <ul>
-        ${teacherListHtml}
+        ${teacherNames.length > 0 ? teacherNames.join('') : '<li>لا يوجد أساتذة</li>'}
     </ul>
     <h4 class="font-semibold mb-2">التلاميذ:</h4>
     <ul>
