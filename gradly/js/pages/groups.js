@@ -269,11 +269,12 @@ function setupGroupsPageEvents({students, academic_years, class_groups, teachers
         };
     });
     document.querySelectorAll('.edit-group-btn').forEach(btn => {
-        btn.onclick = function() {
-            const groupId = this.getAttribute('data-group-id');
-            showEditGroupModal(groupId, class_groups, teachers);
-        };
-    });
+    btn.onclick = function() {
+        const groupId = this.getAttribute('data-group-id');
+        // تأكد من تمرير الـ levels هنا أيضاً
+        showEditGroupModal(groupId, class_groups, teachers, levels); 
+    };
+  });
 
 
     // --- أحداث النافذة المنبثقة (Modal) لإضافة فوج ---
@@ -385,19 +386,24 @@ function showAddGroupModal(yearId, teachers, levels, preselectedLevelId = null) 
     modal.classList.remove('hidden');
 }
 
-function showEditGroupModal(groupId, class_groups, teachers) {
+function showEditGroupModal(groupId, class_groups, teachers, levels) {
     const modal = document.getElementById('add-group-modal');
     const form = document.getElementById('add-group-form');
+    const title = modal.querySelector('h3'); // لتغيير عنوان النافذة
     if (!modal || !form) return;
 
-    // جلب بيانات الفوج
+    form.reset();
+    if (title) title.textContent = "تعديل بيانات الفوج";
+
+    // جلب بيانات الفوج المطلوب تعديله
     const group = class_groups.find(g => g.id == groupId);
     if (!group) return;
 
-    // تعبئة الحقول
-    document.getElementById('group-name').value = group.name;
+    // 1. تعبئة القيم المخفية
     document.getElementById('group-year-id').value = group.year_id;
+    form.dataset.editId = groupId;
 
+    // 2. تعبئة قائمة المعلمين واختيار المعلم الحالي
     const teacherSelect = document.getElementById('group-teacher');
     teacherSelect.innerHTML = '<option value="" disabled>-- اختر معلمًا --</option>';
     (teachers || []).forEach(teacher => {
@@ -408,8 +414,16 @@ function showEditGroupModal(groupId, class_groups, teachers) {
         teacherSelect.appendChild(option);
     });
 
-    // ضع معرف الفوج في form.dataset.editId
-    form.dataset.editId = groupId;
+    // 3. تعبئة قائمة المستويات واختيار المستوى الحالي (هذا ما كان ينقصك)
+    const levelSelect = document.getElementById('group-level');
+    levelSelect.innerHTML = '<option value="" disabled>-- اختر المستوى الدراسي --</option>';
+    (levels || []).forEach(level => {
+        const option = document.createElement('option');
+        option.value = level.id;
+        option.textContent = level.name;
+        if (level.id == group.level_id) option.selected = true;
+        levelSelect.appendChild(option);
+    });
 
     modal.classList.remove('hidden');
 }
