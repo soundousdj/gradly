@@ -530,31 +530,29 @@ async function showGroupDetailsModal(groupId, class_groups, teachers) {
       .select('teacher_id, subject_id, profiles:teacher_id (full_name), subjects:subject_id (name)')
       .eq('class_id', groupId);
 
-  // جلب جميع المواد مرة واحدة
-  // بناء قائمة الأساتذة للعرض باستخدام البيانات التي جلبناها بالـ Join
-  let teacherEntriesHtml = '';
+// --- بناء قائمة الأساتذة للعرض ---
+  let teacherListHtml = '';
 
-  // 1. عرض المعلم المسؤول (الموجود في بيانات الفوج الأصلية)
+  // 1. عرض المعلم المسؤول (الموجود في تعريف الفوج نفسه)
   if (group && group.teacher_id) {
-      const mainTeacher = (teachers || []).find(t => t.id === group.teacher_id);
-      teacherNamesHtml = `<li>${mainTeacher ? mainTeacher.full_name : 'أستاذ'} - <span class="text-gray-500">(المعلم المسؤول)</span></li>`;
-  } else {
-      teacherNamesHtml = '';
+      const mainT = (teachers || []).find(t => String(t.id) === String(group.teacher_id));
+      teacherListHtml += `<li>${mainT ? mainT.full_name : 'أستاذ'} - <span class="text-gray-500">(المعلم المسؤول)</span></li>`;
   }
 
-  // 2. عرض الأساتذة والمواد من الجدول المشترك (الموجودين في teachersInGroup)
+  // 2. عرض الأساتذة والمواد من الجدول المشترك (الذين جلبناهم بالـ Join)
   if (teachersInGroup && teachersInGroup.length > 0) {
       teachersInGroup.forEach(tg => {
-          // تجنب تكرار المعلم المسؤول إذا كان موجوداً في الجدولين
-          if (group && tg.teacher_id === group.teacher_id) return;
+          // تجنب تكرار المعلم المسؤول إذا كان موجوداً في القائمة أيضاً
+          if (group && String(tg.teacher_id) === String(group.teacher_id)) return;
 
-          const tName = tg.profiles ? tg.profiles.full_name : 'أستاذ';
+          const tName = tg.profiles ? tg.profiles.full_name : 'أستاذ مجهول';
           const sName = tg.subjects ? tg.subjects.name : 'بدون مادة';
-          teacherNamesHtml += `<li>${tName} - <span class="text-blue-600 font-bold">(${sName})</span></li>`;
+          
+          teacherListHtml += `<li>${tName} - <span class="text-blue-600 font-bold">(${sName})</span></li>`;
       });
   }
 
-  if (teacherNamesHtml === '') teacherNamesHtml = '<li>لا يوجد أساتذة مضافين</li>';
+  if (teacherListHtml === '') teacherListHtml = '<li>لا يوجد أساتذة مضافين</li>';
   // بناء عناصر العرض
   const teacherNames = teacherEntries.map(entry => {
       const teacher = teachersMap[String(entry.teacher_id)];
@@ -572,10 +570,7 @@ async function showGroupDetailsModal(groupId, class_groups, teachers) {
     <button id="export-group-students" class="bg-green-500 text-white px-2 py-1 rounded mb-2">تصدير التلاميذ إلى Excel</button>
     <h4 class="font-semibold mb-2">الأساتذة:</h4>
     <ul>
-        ${teacherNamesHtml}
-    </ul>
-    <ul>
-        ${teacherNames.length > 0 ? teacherNames.join('') : '<li>لا يوجد أساتذة</li>'}
+        ${teacherListHtml}
     </ul>
     <h4 class="font-semibold mb-2">التلاميذ:</h4>
     <ul>
