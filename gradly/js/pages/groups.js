@@ -722,7 +722,7 @@ async function addTeacherToGroup(groupId, teacherId, subjectId) {
         if (subjId !== null) {
             const { data: existing, error: exErr } = await window.supabaseClient
                 .from('teacher_class_groups')
-                .select('teacher_id')
+                .select('id')
                 .eq('class_id', classId)
                 .eq('subject_id', subjId)
                 .limit(1);
@@ -738,7 +738,7 @@ async function addTeacherToGroup(groupId, teacherId, subjectId) {
         } else {
             const { data: existing, error: exErr } = await window.supabaseClient
                 .from('teacher_class_groups')
-                .select('teacher_idز')
+                .select('id')
                 .eq('class_id', classId)
                 .eq('teacher_id', teacher)
                 .limit(1);
